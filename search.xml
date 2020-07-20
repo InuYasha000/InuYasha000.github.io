@@ -25,4 +25,106 @@
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
 ]]></content>
   </entry>
+  <entry>
+    <title>java内存模型之重排序</title>
+    <url>/2020/07/21/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在了解重排序之前，你还需要知道一些基础概念知识，我在这罗列出来。</p>
+<h3 id="数据依赖性"><a href="#数据依赖性" class="headerlink" title="数据依赖性"></a>数据依赖性</h3><p>如果两个操作同时访问同一个变量，只要其中有一个操作是写操作，那么这两个操作之间就存在数据依赖性。具体示例见下表:</p>
+<table>
+<thead>
+<tr>
+<th align="center">操作顺序</th>
+<th align="center">代码</th>
+<th align="center">解释说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">先写a再读a</td>
+<td align="center">a=1;b=a</td>
+<td align="center">先写a为1，再读取a的值赋给b</td>
+</tr>
+<tr>
+<td align="center">先写a再写a</td>
+<td align="center">a=1;a=2</td>
+<td align="center">先写a为1，再写a为2</td>
+</tr>
+<tr>
+<td align="center">先读b再写b</td>
+<td align="center">a=b;b=1</td>
+<td align="center">先写a为b，再写b为1</td>
+</tr>
+</tbody></table>
+<p>很明显，我们可以得知上面顺序一旦交换，最后结果是有问题的，所以<strong>在重排序中，会遵守数据依赖性，重排序不会改变存在数据依赖性的两个操作的执行顺序</strong>。<br>需要注意的是<strong>数据依赖性是针对单线程</strong>而言的，多线程是不存在数据依赖性这一说，也就是重排序在多线程这一块并不遵守这个规定。</p>
+<h3 id="java内存模型抽象概念"><a href="#java内存模型抽象概念" class="headerlink" title="java内存模型抽象概念"></a>java内存模型抽象概念</h3><p><img src="https://upload-images.jianshu.io/upload_images/18971971-f4b4c8a738c2a20f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="jmm内存模型抽象图"><br>java语言中，堆内存是多线程共享，所以图中的<strong>共享变量指的是实例域，静态域，数组元素，而不是局部变量，方法定义参数，异常处理参数</strong>。</p>
+<h3 id="内存一致性"><a href="#内存一致性" class="headerlink" title="内存一致性"></a>内存一致性</h3><p>内存一致性说的是共享内存多核处理器访存序的问题，进程对某一个内存地址(和分布式的同一数据多副本的一致性有所区别)的访问序在多核下暴露出的问题，单核乱序执行重新排列无关的指令在多核系统中可能出现问题。也就是程序中 Load Store 的(ISA)顺序(冯诺依曼架构下看可以看做内存操作请求的顺序)和Load Store实际执行完成的顺序可能相同、可能不同(这取决于微体系结构的实现)，在多核情况下，程序的正确性可能出问题。有各种一致性模型来表达各种程度的相同不同，相应的有软、硬件机制来确保多核处理器上程序的正确运行</p>
+<h3 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h3><p>//TODO</p>
+<h3 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h3><table>
+<thead>
+<tr>
+<th align="center">屏障类型</th>
+<th align="center">示例</th>
+<th align="center">解释说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">LoadLoad Barriers</td>
+<td align="center">Load1;LoadLoad;Load2</td>
+<td align="center">确保Load1数据的装载先于Load2及所有后续装载指令的装载</td>
+</tr>
+<tr>
+<td align="center">StoreStore Barriers</td>
+<td align="center">Stroe1;StoreStore;Store2</td>
+<td align="center">确保Store1数据对其它处理器可见(刷新到内存)先于Store2及所有后续存储指令的存储</td>
+</tr>
+<tr>
+<td align="center">LoadStore Barriers</td>
+<td align="center">Load1;LoadStore;Store2</td>
+<td align="center">确保Load1装载数据先于Store2及所有后续的储存指令刷新到内存</td>
+</tr>
+<tr>
+<td align="center">StoreLoad Barriers</td>
+<td align="center">Stroe1;StoreLoad;Load2</td>
+<td align="center">确保Strore1数据对其它处理器可见(刷新到内存),先于Load2及所有后续存储指令的存储</td>
+</tr>
+</tbody></table>
+<p>StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个屏障的效果。现代的多处理器大多支持该屏障（其他类型的屏障不一定被所有处理器支持）。执行该屏障开销会很昂贵，因为当前处理器通常要把写缓冲区中的数据全部刷新到内存中（Buffer Fully Flush）。</p>
+<h2 id="源码到指令的重排序"><a href="#源码到指令的重排序" class="headerlink" title="源码到指令的重排序"></a>源码到指令的重排序</h2><p><strong>编译器和处理器会对指令来做重排序，是为了提高性能。</strong><br>重排序分为以下三类：</p>
+<ul>
+<li><strong>编译器优化的重排序</strong>。编译器在不改变单线程程序语义的前提下(也就是不改变单线程运行结果,其实这也可以用数据依赖性来解释)，可以重新安排语句的执行顺序</li>
+<li><strong>处理器指令级并行的重排序</strong>。现代处理器采用了指令级并行技术（Instruction-Level Parallelism，ILP）来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序</li>
+<li><strong>内存系统的重排序</strong>。由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行</li>
+</ul>
+<p><img src="https://upload-images.jianshu.io/upload_images/18971971-0cfc57f9372eca97.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="源码到指令之间的重排序"><br>对于<strong>编译器</strong>，JMM的编译器重排序规则会<strong>禁止特定类型的编译器重排序</strong>（不是所有的编译器重排序都要禁止）。<br>对于<strong>处理器重排序</strong>，JMM的处理器重排序规则会要求Java编译器在生成指令序列时，<strong>插入特定类型的内存屏障</strong>（Memory Barriers，Intel称之为 Memory Fence）指令，通过内存屏障指令来禁止特定类型的处理器重排序。</p>
+<h2 id="重排序带来的问题"><a href="#重排序带来的问题" class="headerlink" title="重排序带来的问题"></a>重排序带来的问题</h2><table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">程序1</th>
+<th align="center">程序2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">代码</td>
+<td align="center">a=1;//A1<br>x=b;//A2</td>
+<td align="center">b=2;//B1<br>y=a;//B2</td>
+</tr>
+<tr>
+<td align="center">结果</td>
+<td align="center">有可能错误的结果 x=y=0</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>如下图:<img src="https://upload-images.jianshu.io/upload_images/18971971-02b26121efb878ed.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="重排序带来的问题"><br>这里处理器A和处理器B可以同时把共享变量写入自己的写缓冲区（A1，B1），然后从内存中读取另一个共享变量（A2，B2），最后才把自己写缓存区中保存的脏数据刷新到内存中（A3， B3）。当以这种时序执行时，程序就可以得到x=y=0的结果</p>
+<p>这段代码也可以让你更清晰的认识到重排序带来的问题</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class ReorderExample &#123;</span><br><span class="line">    int a &#x3D; 0;</span><br><span class="line">    boolean flag &#x3D; false;</span><br><span class="line"></span><br><span class="line">    public void writer() &#123;</span><br><span class="line">        a &#x3D; 1; &#x2F;&#x2F; 1</span><br><span class="line">        flag &#x3D; true; &#x2F;&#x2F; 2</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Public void reader() &#123;</span><br><span class="line">        if (flag) &#123; &#x2F;&#x2F; 3</span><br><span class="line">            int i &#x3D; a * a; &#x2F;&#x2F; 4</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码在多线程运行环境下可能的时序图有以下:<br><img src="https://upload-images.jianshu.io/upload_images/18971971-8956f30f35f55995.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="程序执行时序图1"><br><img src="https://upload-images.jianshu.io/upload_images/18971971-464e0086ea0914d4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="程序执行时序图2"></p>
+<p>通过这两张图我想已经很清晰的向你展示了重排序在多线程环境下给程序带来的不可控的结果,需要再次重申一次的是<strong>单线程下操作之间存在数据依赖性，不会重排序，但是多线程下，比如线程A的flag = true和线程B的if(flag) 并不存在数据依赖性</strong>,所以重排序在多线程下会发现，最后带来的就是程序结果和预期的不一样。</p>
+]]></content>
+      <categories>
+        <category>详解java并发</category>
+      </categories>
+      <tags>
+        <tag>java并发</tag>
+      </tags>
+  </entry>
 </search>
