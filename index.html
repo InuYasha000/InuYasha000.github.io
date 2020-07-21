@@ -404,7 +404,8 @@
 
       
         
-          <p>##happends-before<br>前面文章我们简单说了下重排序，重排序带来的最大的问题就是多线程环境下程序运行结果不可控，和我们期待不一样，这个时候就引入了happend-before规则，也就是说happend-before是用来保证多线程环境下程序结果的正确性.<br>###happens-before定义<br>在《JSR-133:Java Memory Model and Thread Specification》中是这样定义happens-before规则：</p>
+          <h2 id="happends-before"><a href="#happends-before" class="headerlink" title="happends-before"></a>happends-before</h2><p>前面文章我们简单说了下重排序，重排序带来的最大的问题就是多线程环境下程序运行结果不可控，和我们期待不一样，这个时候就引入了happend-before规则，也就是说happend-before是用来保证多线程环境下程序结果的正确性.</p>
+<h3 id="happens-before定义"><a href="#happens-before定义" class="headerlink" title="happens-before定义"></a>happens-before定义</h3><p>在《JSR-133:Java Memory Model and Thread Specification》中是这样定义happens-before规则：</p>
 <ul>
 <li>如果一个操作happens-before另一个操作，那么<strong>第一个操作的执行结果将对第二个操作可见</strong>，而且第一个操作的执行顺序排在第二个操作之前。</li>
 <li>两个操作之间存在happens-before关系，并不意味着Java平台的具体实现必须要按照 happens-before关系指定的顺序来执行。如果重排序之后的执行结果，与按happens-before关系来执行的结果一致，那么这种重排序并不非法，也就是说，JMM允许这种重排序。</li>
