@@ -6,6 +6,27 @@
     <content><![CDATA[]]></content>
   </entry>
   <entry>
+    <title>happens-before和as-if-serial语义</title>
+    <url>/2020/07/21/happens-before%E5%92%8Cas-if-serial%E8%AF%AD%E4%B9%89/</url>
+    <content><![CDATA[<p>##happends-before<br>前面文章我们简单说了下重排序，重排序带来的最大的问题就是多线程环境下程序运行结果不可控，和我们期待不一样，这个时候就引入了happend-before规则，也就是说happend-before是用来保证多线程环境下程序结果的正确性.<br>###happens-before定义<br>在《JSR-133:Java Memory Model and Thread Specification》中是这样定义happens-before规则：</p>
+<ul>
+<li>如果一个操作happens-before另一个操作，那么<strong>第一个操作的执行结果将对第二个操作可见</strong>，而且第一个操作的执行顺序排在第二个操作之前。</li>
+<li>两个操作之间存在happens-before关系，并不意味着Java平台的具体实现必须要按照 happens-before关系指定的顺序来执行。如果重排序之后的执行结果，与按happens-before关系来执行的结果一致，那么这种重排序并不非法，也就是说，JMM允许这种重排序。</li>
+</ul>
+<a id="more"></a>
+<p>咋看之下这两条规则是矛盾的，其实核心点在于<strong>第一个操作的结果对第一个操作可见</strong>。</p>
+<p>第一点是从JMM角度出发，JMM承诺给程序员如果A happends-before B，那么A的执行结果B是看的到的，并且A在B之前执行<br>第二点则是从编译器和处理器重排序角度出发，重排序的原则就在于只要我保证程序运行结果是正确的，我就会进行重排序优化，而这个结果正确如何保证了，也就是<strong>如果A happends-before B，那么A的执行结果B是看的到的(结果正确)，但我不保证A在B之前执行(我还是会进行重排序优化，前提是结果正确)。</strong></p>
+<p>其实我并没找到很好的例子来佐证第二点，但是要传递的思想就是程序员追求程序结果正确，而不关心内部处理器如何优化重排序。<br>###hanppens-before规则<br>1：程序顺序规则：一个线程中的每个操作，happens-before于该线程中的任意后续操作。<br>2：监视器锁规则：对一个锁的解锁，happens-before于随后对这个锁的加锁。<br>3：volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读。<br>4：传递性：如果A happens-before B，且B happens-before C，那么A happens-before C。<br>5：start()规则：如果线程A执行操作ThreadB.start()（启动线程B），那么A线程的 ThreadB.start()操作happens-before于线程B中的任意操作。<br>6：join()规则：如果线程A执行操作ThreadB.join()并成功返回，那么线程B中的任意操作 happens-before于线程A从ThreadB.join()操作成功返回。<br>##as-if-serial语义<br>相较于happend-before，as-if-serial相对简单：不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。编译器、runtime和处理器都必须遵守as-if-serial语义，为了遵守as-if-serial语义，编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。但是，如果操作之间不存在数据依赖关系，这些操作就可能被编译器和处理器重排序</p>
+<p>as-if-serial带给编写单线程程序的程序员的幻觉：我的程序是按照顺序执行，虽然有可能处理器做了优化重排序,但是最后结果是正确的。</p>
+]]></content>
+      <categories>
+        <category>详解java并发</category>
+      </categories>
+      <tags>
+        <tag>java并发</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2020/07/18/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
@@ -44,6 +65,11 @@
       <categories>
         <category>每日一题</category>
       </categories>
+  </entry>
+  <entry>
+    <title>java内存模型之volatile</title>
+    <url>/2020/07/21/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B9%8Bvolatile/</url>
+    <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title>java内存模型之重排序</title>
