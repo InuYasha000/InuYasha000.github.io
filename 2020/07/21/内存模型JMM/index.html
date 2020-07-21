@@ -91,7 +91,7 @@
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/18971971-8956f30f35f55995.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/18971971-464e0086ea0914d4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="article:published_time" content="2020-07-20T16:26:52.000Z">
-<meta property="article:modified_time" content="2020-07-20T18:32:22.743Z">
+<meta property="article:modified_time" content="2020-07-21T13:10:46.388Z">
 <meta property="article:author" content="Cheng">
 <meta property="article:tag" content="java并发">
 <meta name="twitter:card" content="summary">
@@ -470,6 +470,7 @@
 <td align="center">确保Strore1数据对其它处理器可见(刷新到内存),先于Load2及所有后续存储指令的存储</td>
 </tr>
 </tbody></table>
+<a id="more"></a>
 <p>StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个屏障的效果。现代的多处理器大多支持该屏障（其他类型的屏障不一定被所有处理器支持）。执行该屏障开销会很昂贵，因为当前处理器通常要把写缓冲区中的数据全部刷新到内存中（Buffer Fully Flush）。</p>
 <h2 id="源码到指令的重排序"><a href="#源码到指令的重排序" class="headerlink" title="源码到指令的重排序"></a>源码到指令的重排序</h2><p><strong>编译器和处理器会对指令来做重排序，是为了提高性能。</strong><br>重排序分为以下三类：</p>
 <ul>
