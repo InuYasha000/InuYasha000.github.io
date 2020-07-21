@@ -431,38 +431,6 @@
 </tr>
 </tbody></table>
 <p>很明显，我们可以得知上面顺序一旦交换，最后结果是有问题的，所以<strong>在重排序中，会遵守数据依赖性，重排序不会改变存在数据依赖性的两个操作的执行顺序</strong>。<br>需要注意的是<strong>数据依赖性是针对单线程</strong>而言的，多线程是不存在数据依赖性这一说，也就是重排序在多线程这一块并不遵守这个规定。</p>
-<h3 id="java内存模型抽象概念"><a href="#java内存模型抽象概念" class="headerlink" title="java内存模型抽象概念"></a>java内存模型抽象概念</h3><p><img src="https://upload-images.jianshu.io/upload_images/18971971-f4b4c8a738c2a20f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="jmm内存模型抽象图"><br>java语言中，堆内存是多线程共享，所以图中的<strong>共享变量指的是实例域，静态域，数组元素，而不是局部变量，方法定义参数，异常处理参数</strong>。</p>
-<h3 id="内存一致性"><a href="#内存一致性" class="headerlink" title="内存一致性"></a>内存一致性</h3><p>内存一致性说的是共享内存多核处理器访存序的问题，进程对某一个内存地址(和分布式的同一数据多副本的一致性有所区别)的访问序在多核下暴露出的问题，单核乱序执行重新排列无关的指令在多核系统中可能出现问题。也就是程序中 Load Store 的(ISA)顺序(冯诺依曼架构下看可以看做内存操作请求的顺序)和Load Store实际执行完成的顺序可能相同、可能不同(这取决于微体系结构的实现)，在多核情况下，程序的正确性可能出问题。有各种一致性模型来表达各种程度的相同不同，相应的有软、硬件机制来确保多核处理器上程序的正确运行</p>
-<h3 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h3><p>//TODO</p>
-<h3 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h3><table>
-<thead>
-<tr>
-<th align="center">屏障类型</th>
-<th align="center">示例</th>
-<th align="center">解释说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">LoadLoad Barriers</td>
-<td align="center">Load1;LoadLoad;Load2</td>
-<td align="center">确保Load1数据的装载先于Load2及所有后续装载指令的装载</td>
-</tr>
-<tr>
-<td align="center">StoreStore Barriers</td>
-<td align="center">Stroe1;StoreStore;Store2</td>
-<td align="center">确保Store1数据对其它处理器可见(刷新到内存)先于Store2及所有后续存储指令的存储</td>
-</tr>
-<tr>
-<td align="center">LoadStore Barriers</td>
-<td align="center">Load1;LoadStore;Store2</td>
-<td align="center">确保Load1装载数据先于Store2及所有后续的储存指令刷新到内存</td>
-</tr>
-<tr>
-<td align="center">StoreLoad Barriers</td>
-<td align="center">Stroe1;StoreLoad;Load2</td>
-<td align="center">确保Strore1数据对其它处理器可见(刷新到内存),先于Load2及所有后续存储指令的存储</td>
-</tr>
-</tbody></table>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/07/21/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/#more" rel="contents">
