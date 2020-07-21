@@ -505,6 +505,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%A6%E8%A7%A3java%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">详解java并发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -533,9 +555,21 @@
 
       
         
-          
-            
-          
+          <h2 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h2><p>看向这张图：<img src="https://upload-images.jianshu.io/upload_images/18971971-b5d0aa41f5c0ced0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>很显然当线程A,B同时对一个共享变量操作时(先操作共享变量的副本，然后再把副本刷新到主内存中)，会出现<strong>缓存一致性</strong>问题，最简单的例子就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i++;</span><br></pre></td></tr></table></figure>
+<p>不同线程对各自内存中的i执行i++操作，但是回写到主内存时会覆盖其它线程的操作结果，最终结果和预想不一致，这个现象称为<strong>缓存一致性</strong>，解决它主要两种方案</p>
+<ul>
+<li>通过在总线加LOCK#锁的方式(简单理解成某一时刻只能有一个线程操作某个共享变量更多总线锁内容可以参考#<a href="https://blog.csdn.net/qq_35642036/article/details/82801708" target="_blank" rel="noopener">总线锁</a></li>
+<li>通过缓存一致性协议</li>
+</ul>
+<p>很明显第一种方案–总线锁采用一种独占的方式来实现的，即总线加LOCK#锁的话，只能有一个CPU能够运行，其他CPU都得阻塞，效率堪忧，第二种方案–缓存一致性协议（MESI协议）它确保每个缓存中使用的共享变量是一致的。其核心思想如下：<strong>当某个CPU在写数据时，如果发现操作的变量是共享变量，则会通知其他CPU告知该变量的缓存行是无效的，因此其他CPU在读取该变量时，发现其无效会重新从主存中加载数据。</strong></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/07/21/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B9%8Bvolatile/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>

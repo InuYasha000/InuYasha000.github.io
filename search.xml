@@ -30,11 +30,6 @@
       </tags>
   </entry>
   <entry>
-    <title>java内存模型之volatile</title>
-    <url>/2020/07/21/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B9%8Bvolatile/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
     <title>Hello World</title>
     <url>/2020/07/18/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
@@ -53,6 +48,151 @@
 
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
 ]]></content>
+  </entry>
+  <entry>
+    <title>java内存模型之volatile</title>
+    <url>/2020/07/21/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B9%8Bvolatile/</url>
+    <content><![CDATA[<h2 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h2><p>看向这张图：<img src="https://upload-images.jianshu.io/upload_images/18971971-b5d0aa41f5c0ced0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>很显然当线程A,B同时对一个共享变量操作时(先操作共享变量的副本，然后再把副本刷新到主内存中)，会出现<strong>缓存一致性</strong>问题，最简单的例子就是</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">i++;</span><br></pre></td></tr></table></figure>
+<p>不同线程对各自内存中的i执行i++操作，但是回写到主内存时会覆盖其它线程的操作结果，最终结果和预想不一致，这个现象称为<strong>缓存一致性</strong>，解决它主要两种方案</p>
+<ul>
+<li>通过在总线加LOCK#锁的方式(简单理解成某一时刻只能有一个线程操作某个共享变量更多总线锁内容可以参考#<a href="https://blog.csdn.net/qq_35642036/article/details/82801708" target="_blank" rel="noopener">总线锁</a></li>
+<li>通过缓存一致性协议</li>
+</ul>
+<p>很明显第一种方案–总线锁采用一种独占的方式来实现的，即总线加LOCK#锁的话，只能有一个CPU能够运行，其他CPU都得阻塞，效率堪忧，第二种方案–缓存一致性协议（MESI协议）它确保每个缓存中使用的共享变量是一致的。其核心思想如下：<strong>当某个CPU在写数据时，如果发现操作的变量是共享变量，则会通知其他CPU告知该变量的缓存行是无效的，因此其他CPU在读取该变量时，发现其无效会重新从主存中加载数据。</strong></p>
+<a id="more"></a>
+<h2 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h2><ul>
+<li>可见性：被volatile修饰的共享变量一旦被一个线程修改，会立刻同步到主内存中，并且别的线程在使用这个共享变量时会从主内存中读取，而不是本地内存</li>
+<li>有序性：禁止指令重排序(JVM底层volatile是采用“内存屏障”来实现的)</li>
+<li>只保证单次读写的原子性，不保证复合操作的原子性，也就是i++，即使i使用了volatile关键字修饰，也不是一个原子操作</li>
+</ul>
+<h3 id="volatile原理"><a href="#volatile原理" class="headerlink" title="volatile原理"></a>volatile原理</h3><h4 id="lock指令"><a href="#lock指令" class="headerlink" title="lock指令"></a>lock指令</h4><p>当修改一个volatile修饰的变量，在写回到主内存中会多出现一行汇编命令：<br>lock addl $0×0,(%esp)<br>这一行命令作用有三:</p>
+<ul>
+<li>锁总线，其它CPU对内存的读写请求都会被阻塞，直到锁释放，不过实际后来的处理器都采用锁缓存替代锁总线，因为锁总线的开销比较大，锁总线期间其他CPU没法访问内存</li>
+<li>lock后的写操作会回写已修改的数据，同时让其它CPU相关缓存行失效，从而重新从主存中加载最新的数据</li>
+<li>不是内存屏障却能完成类似内存屏障的功能，阻止屏障两遍的指令重排序<br>更多lock指令详解可以参考# <a href="https://www.cnblogs.com/badboys/p/12695183.html" target="_blank" rel="noopener">volatile与lock前缀指令</a></li>
+</ul>
+<p>那么<strong>每个处理器通过嗅探在总线上传播的数据来检查自己的缓存值是不是过期了，如果处理器发现自己缓存行对应的内存地址呗修改，就会将当前处理器的缓存行设置无效状态，会重新从系统内存中把数据库读到处理器缓存中。</strong></p>
+<h4 id="volatile重排序规则"><a href="#volatile重排序规则" class="headerlink" title="volatile重排序规则"></a>volatile重排序规则</h4><table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">第二个操作</th>
+<th align="center"></th>
+<th align="center"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">第一个操作</td>
+<td align="center">普通读写</td>
+<td align="center">volatile读</td>
+<td align="center">volatile写</td>
+</tr>
+<tr>
+<td align="center">普通读写</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">NO</td>
+</tr>
+<tr>
+<td align="center">volatiel读</td>
+<td align="center">NO</td>
+<td align="center">NO</td>
+<td align="center">NO</td>
+</tr>
+<tr>
+<td align="center">volatiel写</td>
+<td align="center"></td>
+<td align="center">No</td>
+<td align="center">NO</td>
+</tr>
+<tr>
+<td align="center">总结：</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 当第二个操作是volatile写时，不管第一个操作是什么，都不能重排序。这个规则确保 volatile写之前的操作不会被编译器重排序到volatile写之后</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 当第一个操作是volatile读时，不管第二个操作是什么，都不能重排序。这个规则确保 volatile读之后的操作不会被编译器重排序到volatile读之前</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 当第一个操作是volatile写，第二个操作是volatile读时，不能重排序。</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">#### 内存屏障</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 在每个volatile写操作的前面插入一个StoreStore屏障</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 在每个volatile写操作的后面插入一个StoreLoad屏障</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 在每个volatile读操作的后面插入一个LoadLoad屏障</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">- 在每个volatile读操作的后面插入一个LoadStore屏障</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">这是JMM在保守策略下指令序列生成，如下图：</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><img src="https://upload-images.jianshu.io/upload_images/18971971-bfe00fdad205f137.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">编译器则会在字节码做一些优化，如下图：</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><img src="https://upload-images.jianshu.io/upload_images/18971971-ccab4d06f1d17716.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>在优化这一阶段，不同处理器也有各自不同的松紧度，比如x86处理器，只会有最后的StoreLoad屏障(我们在前面文章也说过StoreLoad就是另外三个屏障功能的综合)，如下图：<br><img src="https://upload-images.jianshu.io/upload_images/18971971-b6c61128912b6f3c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+]]></content>
+      <categories>
+        <category>详解java并发</category>
+      </categories>
+      <tags>
+        <tag>java并发</tag>
+      </tags>
   </entry>
   <entry>
     <title>为什么 wait ，notify方法定义在 Object 类里面，而不是Thread中</title>
