@@ -30,6 +30,26 @@
       </tags>
   </entry>
   <entry>
+    <title>Hello World</title>
+    <url>/2020/07/18/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<a id="more"></a>
+
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+]]></content>
+  </entry>
+  <entry>
     <title>java内存模型之volatile</title>
     <url>/2020/07/21/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B9%8Bvolatile/</url>
     <content><![CDATA[<h2 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h2><p>看向这张图：<img src="https://upload-images.jianshu.io/upload_images/18971971-b5d0aa41f5c0ced0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>很显然当线程A,B同时对一个共享变量操作时(先操作共享变量的副本，然后再把副本刷新到主内存中)，会出现<strong>缓存一致性</strong>问题，最简单的例子就是</p>
@@ -112,24 +132,24 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/2020/07/18/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+    <title>为什么 wait ，notify方法定义在 Object 类里面，而不是Thread中</title>
+    <url>/2020/07/21/%E4%B8%BA%E4%BB%80%E4%B9%88%20wait%20%EF%BC%8Cnotify%E6%96%B9%E6%B3%95%E5%AE%9A%E4%B9%89%E5%9C%A8%20Object%20%E7%B1%BB%E9%87%8C%E9%9D%A2%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AFThread%E4%B8%AD/</url>
+    <content><![CDATA[<p>为什么 wait ，notify方法定义在 Object 类里面，而不是Thread中。</p>
+<ul>
+<li>每个对象都可以上锁，所以在所有类的超类Object里面定义而不是Thread定义。</li>
+<li>java的锁是基于monitor(监视器)的概念，而所有对象都是有监视器的。</li>
+</ul>
 <a id="more"></a>
-
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+<p>其实来讲，想要一个线程能够在某个对象上面拿到锁，释放锁，锁等待一系列操作，也就是在monitor上面有这些操作，只需要两个参数即可，线程和某个对象，那么完全可以新建一个utils类，定义一个方法wait(Thread thread,Object object)，但反过来讲，这不就是当前java的设计吗？Object是所有类的超类，wait方法定义在Object中。</p>
+<p>还有两种观点也有道理:</p>
+<ul>
+<li>wait 和 notify 不仅仅是普通方法或同步工具，更重要的是它们是 Java 中两个线程之间的通信机制。对语言设计者而言, 如果不能通过 Java 关键字(例如 synchronized)实现通信此机制，同时又要确保这个机制对每个对象可用, 那么 Object 类则是的合理的声明位置。记住同步和等待通知是两个不同的领域，不要把它们看成是相同的或相关的。同步是提供互斥并确保 Java 类的线程安全，而 wait 和 notify 是两个线程之间的通信机制</li>
+<li>在 Java 中，为了进入代码的临界区，线程需要锁定并等待锁，他们不知道哪些线程持有锁，而只是知道锁被某个线程持有， 并且需要等待以取得锁, 而不是去了解哪个线程在同步块内，并请求它们释放锁</li>
+</ul>
 ]]></content>
+      <categories>
+        <category>每日一题</category>
+      </categories>
   </entry>
   <entry>
     <title>java内存模型之重排序</title>
@@ -233,26 +253,6 @@
       <tags>
         <tag>java并发</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>为什么 wait ，notify方法定义在 Object 类里面，而不是Thread中</title>
-    <url>/2020/07/21/%E4%B8%BA%E4%BB%80%E4%B9%88%20wait%20%EF%BC%8Cnotify%E6%96%B9%E6%B3%95%E5%AE%9A%E4%B9%89%E5%9C%A8%20Object%20%E7%B1%BB%E9%87%8C%E9%9D%A2%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AFThread%E4%B8%AD/</url>
-    <content><![CDATA[<p>为什么 wait ，notify方法定义在 Object 类里面，而不是Thread中。</p>
-<ul>
-<li>每个对象都可以上锁，所以在所有类的超类Object里面定义而不是Thread定义。</li>
-<li>java的锁是基于monitor(监视器)的概念，而所有对象都是有监视器的。</li>
-</ul>
-<a id="more"></a>
-<p>其实来讲，想要一个线程能够在某个对象上面拿到锁，释放锁，锁等待一系列操作，也就是在monitor上面有这些操作，只需要两个参数即可，线程和某个对象，那么完全可以新建一个utils类，定义一个方法wait(Thread thread,Object object)，但反过来讲，这不就是当前java的设计吗？Object是所有类的超类，wait方法定义在Object中。</p>
-<p>还有两种观点也有道理:</p>
-<ul>
-<li>wait 和 notify 不仅仅是普通方法或同步工具，更重要的是它们是 Java 中两个线程之间的通信机制。对语言设计者而言, 如果不能通过 Java 关键字(例如 synchronized)实现通信此机制，同时又要确保这个机制对每个对象可用, 那么 Object 类则是的合理的声明位置。记住同步和等待通知是两个不同的领域，不要把它们看成是相同的或相关的。同步是提供互斥并确保 Java 类的线程安全，而 wait 和 notify 是两个线程之间的通信机制</li>
-<li>在 Java 中，为了进入代码的临界区，线程需要锁定并等待锁，他们不知道哪些线程持有锁，而只是知道锁被某个线程持有， 并且需要等待以取得锁, 而不是去了解哪个线程在同步块内，并请求它们释放锁</li>
-</ul>
-]]></content>
-      <categories>
-        <category>每日一题</category>
-      </categories>
   </entry>
   <entry>
     <title>java并发之Synchronized</title>
